@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Laboratorio: Base de Datos vs Memoria Caché</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eef2f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 450px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        p.desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 25px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 12px 18px;
+            font-size: 15px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+        }
+        .btn-sin {
+            background-color: #e74c3c;
+        }
+        .btn-sin:hover {
+            background-color: #c0392b;
+        }
+        .btn-con {
+            background-color: #27ae60;
+        }
+        .btn-con:hover {
+            background-color: #1e8449;
+        }
+        .card-result {
+            background-color: #f8f9fa;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 110px;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .tiempo-destacado {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Comparación de Rendimiento</h2>
+    <p class="desc">Lectura masiva de 50,000 registros en Spring Boot</p>
+
+    <div class="btn-group">
+        <button class="btn-sin" onclick="probarRendimiento('/sin-cache')">Consultar Sin Caché</button>
+        <button class="btn-con" onclick="probarRendimiento('/con-cache')">Consultar Con Caché</button>
+    </div>
+
+    <div id="pantalla" class="card-result">
+        Haz clic en cualquiera de los botones para iniciar la prueba...
+    </div>
+</div>
+
+<script>
+    async function probarRendimiento(endpoint) {
+        const visor = document.getElementById('pantalla');
+        visor.innerHTML = "⏳ <i>Consultando registros en el servidor...</i>";
+
+        try {
+            const tiempoInicio = performance.now();
+            const respuesta = await fetch('http://localhost:8080/api' + endpoint);
+            const datos = await respuesta.json();
+            const tiempoFin = performance.now();
+            const tiempoTotalNavegador = Math.round(tiempoFin - tiempoInicio);
+
+            visor.innerHTML = `
+                📌 <b>Modo:</b> ${datos.tipo}<br>
+                📦 <b>Registros recuperados:</b> ${datos.totalRegistros.toLocaleString()}<br>
+                ⏱️ <b>Tiempo en Backend:</b> <span class="tiempo-destacado">${datos.tiempoMs} ms</span><br>
+                🌐 <b>Tiempo total percibido:</b> ${tiempoTotalNavegador} ms
+            `;
+        } catch (error) {
+            visor.innerHTML = `
+                <span style="color: red;">❌ <b>Error:</b> No se pudo conectar con el backend en http://localhost:8080.<br>
+                Verifica que la app siga corriendo en IntelliJ.</span>
+            `;
+        }
+    }
+</script>
+
+</body>
+</html>
